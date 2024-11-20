@@ -1,8 +1,11 @@
 package com.dm.projectSpring.Entity;
 
-import jakarta.persistence.*;
-
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
@@ -29,14 +32,17 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AccountType accountType = AccountType.PERSONAL;
+@Column(nullable = false)
+private AccountType accountType;
 
+public enum AccountType {
+    INFLUENCER, PERSONAL
+}
+
+
+    
     // Constructors, getters, and setters
 
-    public enum AccountType {
-        PERSONAL, BUSINESS
-    }
 
     // Add relationships with other entities if necessary
 

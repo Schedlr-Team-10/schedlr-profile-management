@@ -1,14 +1,19 @@
 package com.dm.projectSpring.Controller;
 
-import com.dm.projectSpring.Entity.User;
-import com.dm.projectSpring.Service.UserService;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-import java.util.Optional;
+import com.dm.projectSpring.Entity.User;
+import com.dm.projectSpring.Service.UserService;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -17,11 +22,15 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User registeredUser = userService.registerUser(user);
-        return ResponseEntity.ok(registeredUser);
+   @PostMapping("/register")
+public ResponseEntity<User> registerUser(@RequestBody User user) {
+    if (user.getAccountType() == null) {
+        user.setAccountType(User.AccountType.PERSONAL); // Default role
     }
+    User registeredUser = userService.registerUser(user);
+    return ResponseEntity.ok(registeredUser);
+}
+
 
     @PostMapping("/login")
     public ResponseEntity<Optional<User>> loginUser(@RequestBody Map<String, String> loginData) {
@@ -35,4 +44,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
+
+    
 }
