@@ -39,9 +39,14 @@ public enum AccountType {
     INFLUENCER, PERSONAL
 }
 
+    public AccountType getAccountType() {
+        return accountType;
+    }
 
-    
-    // Constructors, getters, and setters
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
+    }
+// Constructors, getters, and setters
 
 
     // Add relationships with other entities if necessary
