@@ -4,6 +4,8 @@ import com.dm.projectSpring.Entity.User;
 import com.dm.projectSpring.Service.OtpService;
 import com.dm.projectSpring.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -56,15 +58,22 @@ public class UserController {
         String email = request.get("email");
         Map<String, String> response = new HashMap<>();
 
+        if (email == null || email.isEmpty()) {
+            response.put("message", "Email is required.");
+            return response;
+        }
+
         if (!userService.existsByEmail(email)) {
             response.put("message", "Email not registered.");
             return response;
         }
 
         otpService.sendOtpEmail(email);
-        response.put("message", "OTP sent to your email.");
+        response.put("message", "OTP sent to your registered email.");
         return response;
     }
+
+
 
     @PostMapping("/verify-otp")
     public Map<String, String> verifyOtp(@RequestBody Map<String, String> request) {
@@ -72,13 +81,47 @@ public class UserController {
         String otp = request.get("otp");
         Map<String, String> response = new HashMap<>();
 
+        if (email == null || email.isEmpty()) {
+            response.put("message", "Email is required.");
+            return response;
+        }
+
+        if (otp == null || otp.isEmpty()) {
+            response.put("message", "OTP is required.");
+            return response;
+        }
+
         boolean isValid = otpService.verifyOtp(email, otp);
         if (isValid) {
             response.put("message", "OTP verified successfully.");
         } else {
-            response.put("message", "Invalid OTP.");
+            response.put("message", "Invalid or expired OTP.");
         }
 
         return response;
     }
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String newPassword = request.get("newPassword");
+
+        Optional<User> user = userService.findByEmail(email);
+
+        Map<String, String> response = new HashMap<>();
+        if (user.isPresent()) {
+            User existingUser = user.get();
+            existingUser.setPassword(newPassword); // Update password
+            userService.saveUser(existingUser);
+
+            response.put("message", "Password reset successful");
+            return ResponseEntity.ok(response); // Return 200 with success message
+        } else {
+            response.put("message", "Invalid reset request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response); // Return 400 with error
+        }
+    }
+
 }
+
+
+
