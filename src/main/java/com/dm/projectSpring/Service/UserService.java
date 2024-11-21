@@ -11,15 +11,17 @@ import java.util.Optional;
 public class UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    public UserRepository userRepository;
 
-
-    public User registerUser(User user) {
-        return userRepository.save(user);
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
-    public Optional<User> loginUser(String email, String password) {
-        return userRepository.findByEmail(email).filter(user -> user.getPassword().equals(password));
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
 }
