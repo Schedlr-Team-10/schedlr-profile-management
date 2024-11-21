@@ -23,20 +23,20 @@ public class UserController {
     private OtpService otpService;
 
     @PostMapping("/register")
-    public Map<String, String> registerUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody User user) {
         Map<String, String> response = new HashMap<>();
         if (userService.existsByEmail(user.getEmail())) {
             response.put("message", "Email already registered.");
-            return response;
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
 
         userService.saveUser(user);
         response.put("message", "Registration successful.");
-        return response;
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public Map<String, Object> loginUser(@RequestBody Map<String, String> loginData) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Map<String, String> loginData) {
         String email = loginData.get("email");
         String password = loginData.get("password");
 
@@ -46,82 +46,81 @@ public class UserController {
         if (user.isPresent() && user.get().getPassword().equals(password)) {
             response.put("userid", user.get().getUserid());
             response.put("accountType", user.get().getAccountType());
+            return ResponseEntity.ok(response);
         } else {
             response.put("message", "Invalid email or password.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-
-        return response;
     }
 
     @PostMapping("/forgot-password")
-    public Map<String, String> forgotPassword(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         Map<String, String> response = new HashMap<>();
 
         if (email == null || email.isEmpty()) {
             response.put("message", "Email is required.");
-            return response;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
         if (!userService.existsByEmail(email)) {
             response.put("message", "Email not registered.");
-            return response;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
         otpService.sendOtpEmail(email);
         response.put("message", "OTP sent to your registered email.");
-        return response;
+        return ResponseEntity.ok(response);
     }
 
-
-
     @PostMapping("/verify-otp")
-    public Map<String, String> verifyOtp(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> verifyOtp(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String otp = request.get("otp");
         Map<String, String> response = new HashMap<>();
 
         if (email == null || email.isEmpty()) {
             response.put("message", "Email is required.");
-            return response;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
         if (otp == null || otp.isEmpty()) {
             response.put("message", "OTP is required.");
-            return response;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
         boolean isValid = otpService.verifyOtp(email, otp);
         if (isValid) {
             response.put("message", "OTP verified successfully.");
+            return ResponseEntity.ok(response);
         } else {
             response.put("message", "Invalid or expired OTP.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-
-        return response;
     }
+
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String newPassword = request.get("newPassword");
 
-        Optional<User> user = userService.findByEmail(email);
-
         Map<String, String> response = new HashMap<>();
+        if (email == null || email.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+            response.put("message", "Email and password are required.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        Optional<User> user = userService.findByEmail(email);
         if (user.isPresent()) {
             User existingUser = user.get();
             existingUser.setPassword(newPassword); // Update password
             userService.saveUser(existingUser);
 
-            response.put("message", "Password reset successful");
-            return ResponseEntity.ok(response); // Return 200 with success message
+            response.put("message", "Password reset successful.");
+            return ResponseEntity.ok(response);
         } else {
-            response.put("message", "Invalid reset request");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response); // Return 400 with error
+            response.put("message", "Invalid reset request.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
-
 }
-
-
-

@@ -5,7 +5,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -15,7 +15,7 @@ public class OtpService {
     @Autowired
     private JavaMailSender mailSender;
 
-    private final Map<String, String> otpStore = new HashMap<>();
+    private final Map<String, String> otpStore = new ConcurrentHashMap<>();
 
     public void sendOtpEmail(String email) {
         String otp = generateOtp();
@@ -43,3 +43,4 @@ public class OtpService {
         return String.valueOf(otp);
     }
 }
+    
