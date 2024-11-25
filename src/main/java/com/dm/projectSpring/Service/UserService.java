@@ -25,4 +25,18 @@ public class UserService {
     public void saveUser(User user) {
         userRepository.save(user);
     }
+
+    public User updateProfile(int userId, byte[] profilePic, String bio) {
+
+        Optional<User> userOptional = userRepository.findById(Long.valueOf(userId));
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+
+        User user = userOptional.get();
+        user.setProfilepic(profilePic);
+        user.setBio(bio);
+
+        return userRepository.save(user);
+    }
 }
