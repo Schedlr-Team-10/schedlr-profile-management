@@ -133,8 +133,6 @@ public class UserController {
             @PathVariable int userId,
             @RequestParam(required = false) MultipartFile profilePic,
             @RequestParam(required = false) String bio) {
-
-        log.info("Profilepic is : "+ profilePic);
         byte[] profilePicBytes = null;
 
         try {
@@ -147,6 +145,11 @@ public class UserController {
 
         User updatedUser = userService.updateProfile(userId, profilePicBytes, bio);
         return ResponseEntity.ok(updatedUser);
+    }
+
+    @GetMapping("health")
+    public String health(){
+        return "Good";
     }
 
 }
